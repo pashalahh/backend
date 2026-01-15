@@ -1,8 +1,11 @@
 import express from 'express';
 import dotenv from 'dotenv';
+import cors from 'cors';
+
 import categoriesRoute from './routes/categoriesRoute.js';
 import productsRoute from './routes/productsRoute.js';
-import cors from 'cors';
+import customersRoute from './routes/customersRoute.js';
+import ordersRoute from './routes/ordersRoute.js';
 
 
 dotenv.config();
@@ -14,6 +17,8 @@ app.use(express.json());
 
 app.use("/api", categoriesRoute);
 app.use("/api", productsRoute);
+app.use("/api", customersRoute);
+app.use("/api", ordersRoute);
 
 
 app.listen(process.env.port, () => {
