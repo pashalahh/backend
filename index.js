@@ -6,6 +6,7 @@ import categoriesRoute from './routes/categoriesRoute.js';
 import productsRoute from './routes/productsRoute.js';
 import customersRoute from './routes/customersRoute.js';
 import ordersRoute from './routes/ordersRoute.js';
+import transactionsRoute from './routes/transactionsRoute.js';
 
 
 dotenv.config();
@@ -19,6 +20,7 @@ app.use("/api", categoriesRoute);
 app.use("/api", productsRoute);
 app.use("/api", customersRoute);
 app.use("/api", ordersRoute);
+app.use("/api", transactionsRoute);
 
 
 app.listen(process.env.port, () => {
