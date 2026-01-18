@@ -1,18 +1,18 @@
 import express from "express";
 import {
-  getOrders,
-  saveOrder,
-  showOrderById,
-  updateOrderById,
-  deleteOrderById
+  getBestSellingProductLastYear,
+  getTopCustomersLastYear,
+  getTopOrderValueLastYear,
+  getTopItemBuyersLastYear,
+  getTop10BestSellingProductsLastYear
 } from "../controllers/ordersController.js";
 
 const router = express.Router();
 
-router.get("/orders", getOrders);
-router.post("/orders", saveOrder);
-router.get("/orders/:id", showOrderById);
-router.put("/orders/:id", updateOrderById);
-router.delete("/orders/:id", deleteOrderById);
+router.get("/orders/best-product/last-year", getBestSellingProductLastYear);
+router.get("/orders/top-customers/last-year", getTopCustomersLastYear);
+router.get("/orders/top-order-value/last-year", getTopOrderValueLastYear);
+router.get("/orders/top-item-buyers/last-year", getTopItemBuyersLastYear);
+router.get("/orders/top-10-products/last-year", getTop10BestSellingProductsLastYear);
 
 export default router;

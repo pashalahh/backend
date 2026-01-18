@@ -1,130 +1,191 @@
 import db from "../config/db.js";
 
-/**
- * 1. GET
- * Menampilkan semua order + nama metode pembayaran
- */
-export const getOrders = (req, res) => {
-  db.query(
-    `SELECT 
-        o.ORDER_ID,
-        o.ORDER_DATE,
-        o.CUST_ID,
-        o.USER_ID,
-        o.TOTAL,
-        pm.METHOD AS payment_method,
-        o.BANK_TRANS,
-        o.RECEIPT_NUMBER
-     FROM orders o
-     JOIN payment_methods pm ON o.METHOD_ID = pm.METHOD_ID`,
-    (err, results) => {
-      if (err) {
-        return res.status(500).json({ message: err.message });
-      }
-      res.json(results);
-    }
-  );
+// 1. Menampilkan produk terlaris dari tahun sebelumnya
+export const getBestSellingProductLastYear = (req, res) => {
+  const query = `
+    SELECT PRODUCT_NAME, total_beli
+FROM (
+    SELECT 
+        p.PRODUCT_NAME,
+        SUM(od.QTY) AS total_beli
+    FROM orders o
+    INNER JOIN order_details od ON o.ORDER_ID = od.ORDER_ID
+    INNER JOIN products p ON od.PRODUCT_ID = p.PRODUCT_ID
+    WHERE YEAR(o.ORDER_DATE) = YEAR(CURDATE()) - 1
+    GROUP BY p.PRODUCT_ID, p.PRODUCT_NAME
+) AS subquery_produk
+WHERE total_beli = (
+    SELECT MAX(total_beli)
+    FROM (
+        SELECT 
+            SUM(od.QTY) AS total_beli
+        FROM orders o
+        INNER JOIN order_details od ON o.ORDER_ID = od.ORDER_ID
+        WHERE YEAR(o.ORDER_DATE) = YEAR(CURDATE()) - 1
+        GROUP BY od.PRODUCT_ID
+    ) AS max_produk
+);
+`;
+
+  db.query(query, (err, results) => {
+    if (err) return res.status(500).json({ message: err.message });
+    res.json(results[0]);
+  });
 };
 
 /**
- * 2. POST
- * Simpan order (tetap pakai METHOD_ID)
+ * SOAL NO 2
+ * Customer yang paling banyak melakukan order pada tahun sebelumnya
  */
-export const saveOrder = (req, res) => {
-  const {
-    order_date,
-    cust_id,
-    user_id,
-    total,
-    method_id,
-    bank_trans,
-    receipt_number
-  } = req.body;
+export const getTopCustomersLastYear = (req, res) => {
+  const query = `
+    SELECT CUST_NAME, total_order
+FROM (
+    SELECT 
+        c.CUST_NAME,
+        COUNT(o.ORDER_ID) AS total_order
+    FROM orders o
+    INNER JOIN customers c ON o.CUST_ID = c.CUST_ID
+    WHERE YEAR(o.ORDER_DATE) = YEAR(CURDATE()) - 1
+    GROUP BY c.CUST_ID, c.CUST_NAME
+) AS subquery_order
+WHERE total_order = (
+    SELECT MAX(total_order)
+    FROM (
+        SELECT 
+            COUNT(ORDER_ID) AS total_order
+        FROM orders
+        WHERE YEAR(ORDER_DATE) = YEAR(CURDATE()) - 1
+        GROUP BY CUST_ID
+    ) AS max_order
+);
+`;
 
-  db.query(
-    `INSERT INTO orders 
-     (ORDER_DATE, CUST_ID, USER_ID, TOTAL, METHOD_ID, BANK_TRANS, RECEIPT_NUMBER)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    [order_date, cust_id, user_id, total, method_id, bank_trans, receipt_number],
-    (err, results) => {
-      if (err) {
-        return res.status(500).json({ message: err.message });
-      }
-      res.json({ message: "Order berhasil disimpan" });
+  db.query(query, (err, results) => {
+    if (err) {
+      return res.status(500).json({ message: err.message });
     }
-  );
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: "Data tidak ditemukan" });
+    }
+
+    res.json(results);
+  });
 };
 
 /**
- * 3. GET BY ID
- * Detail order + nama metode pembayaran
+ * SOAL NO 3
+ * Customer dengan nilai order terbesar pada tahun sebelumnya
  */
-export const showOrderById = (req, res) => {
-  const { id } = req.params;
+export const getTopOrderValueLastYear = (req, res) => {
+  const query = `
+    SELECT CUST_NAME, total_belanja
+FROM (
+    SELECT 
+        c.CUST_NAME,
+        SUM(o.TOTAL) AS total_belanja
+    FROM orders o
+    INNER JOIN customers c ON o.CUST_ID = c.CUST_ID
+    WHERE YEAR(o.ORDER_DATE) = YEAR(CURDATE()) - 1
+    GROUP BY c.CUST_ID, c.CUST_NAME
+) AS subquery_belanja
+WHERE total_belanja = (
+    SELECT MAX(total_belanja)
+    FROM (
+        SELECT 
+            SUM(TOTAL) AS total_belanja
+        FROM orders
+        WHERE YEAR(ORDER_DATE) = YEAR(CURDATE()) - 1
+        GROUP BY CUST_ID
+    ) AS max_belanja
+);
+`;
 
-  db.query(
-    `SELECT 
-        o.*,
-        pm.METHOD AS payment_method
-     FROM orders o
-     JOIN payment_methods pm ON o.METHOD_ID = pm.METHOD_ID
-     WHERE o.ORDER_ID = ?`,
-    [id],
-    (err, results) => {
-      if (err) {
-        return res.status(500).json({ message: err.message });
-      }
-
-      if (results.length === 0) {
-        return res.status(404).json({ message: "Order tidak ditemukan" });
-      }
-
-      res.json(results[0]);
+  db.query(query, (err, results) => {
+    if (err) {
+      return res.status(500).json({ message: err.message });
     }
-  );
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: "Data tidak ditemukan" });
+    }
+
+    res.json(results);
+  });
 };
 
 /**
- * 4. PUT
- * Update order
+ * SOAL NO 4
+ * Customer dengan jumlah item produk terbanyak pada tahun sebelumnya
  */
-export const updateOrderById = (req, res) => {
-  const { id } = req.params;
-  const {
-    total,
-    method_id,
-    bank_trans
-  } = req.body;
+export const getTopItemBuyersLastYear = (req, res) => {
+  const query = `
+    SELECT CUST_NAME, total_item
+FROM (
+    SELECT 
+        c.CUST_NAME,
+        SUM(od.QTY) AS total_item
+    FROM orders o
+    INNER JOIN order_details od ON o.ORDER_ID = od.ORDER_ID
+    INNER JOIN customers c ON o.CUST_ID = c.CUST_ID
+    WHERE YEAR(o.ORDER_DATE) = YEAR(CURDATE()) - 1
+    GROUP BY c.CUST_ID, c.CUST_NAME
+) AS subquery_item
+WHERE total_item = (
+    SELECT MAX(total_item)
+    FROM (
+        SELECT 
+            SUM(od.QTY) AS total_item
+        FROM orders o
+        INNER JOIN order_details od ON o.ORDER_ID = od.ORDER_ID
+        WHERE YEAR(o.ORDER_DATE) = YEAR(CURDATE()) - 1
+        GROUP BY o.CUST_ID
+    ) AS max_item
+);
+`;
 
-  db.query(
-    `UPDATE orders 
-     SET TOTAL = ?, METHOD_ID = ?, BANK_TRANS = ?
-     WHERE ORDER_ID = ?`,
-    [total, method_id, bank_trans, id],
-    (err, results) => {
-      if (err) {
-        return res.status(500).json({ message: err.message });
-      }
-      res.json({ message: "Order berhasil diupdate" });
+  db.query(query, (err, results) => {
+    if (err) {
+      return res.status(500).json({ message: err.message });
     }
-  );
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: "Data tidak ditemukan" });
+    }
+
+    res.json(results);
+  });
 };
 
 /**
- * 5. DELETE
- * Hapus order
+ * SOAL NO 5
+ * 10 Produk terlaris pada tahun sebelumnya
  */
-export const deleteOrderById = (req, res) => {
-  const { id } = req.params;
+export const getTop10BestSellingProductsLastYear = (req, res) => {
+  const query = `
+    SELECT PRODUCT_NAME, total_beli
+    FROM (
+        SELECT 
+            p.PRODUCT_NAME,
+            SUM(od.QTY) AS total_beli
+        FROM orders o
+        INNER JOIN order_details od 
+            ON o.ORDER_ID = od.ORDER_ID
+        INNER JOIN products p 
+            ON od.PRODUCT_ID = p.PRODUCT_ID
+        WHERE YEAR(o.ORDER_DATE) = YEAR(CURDATE()) - 1
+        GROUP BY p.PRODUCT_ID, p.PRODUCT_NAME
+        ORDER BY total_beli DESC
+        LIMIT 10
+    ) AS subquery_produk
+  `;
 
-  db.query(
-    "DELETE FROM orders WHERE ORDER_ID = ?",
-    [id],
-    (err, results) => {
-      if (err) {
-        return res.status(500).json({ message: err.message });
-      }
-      res.json({ message: "Order berhasil dihapus" });
+  db.query(query, (err, results) => {
+    if (err) {
+      return res.status(500).json({ message: err.message });
     }
-  );
+
+    res.json(results);
+  });
 };

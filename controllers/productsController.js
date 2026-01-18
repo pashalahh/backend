@@ -6,8 +6,7 @@ import db from "../config/db.js";
  */
 export const getProductsMakanan = (req, res) => {
   db.query(
-    "SELECT * FROM products WHERE CATEGORY_ID = ?",
-    ["MK"],
+    "SELECT * FROM products ",
     (err, results) => {
       if (err) {
         return res.status(500).json({ message: err.message });
@@ -23,13 +22,13 @@ export const getProductsMakanan = (req, res) => {
  * CATEGORY_ID dikunci = 'MK'
  */
 export const saveProductMakanan = (req, res) => {
-  const { product_name, price, stock, created_by } = req.body;
+  const { product_name, price, category_id, stock, created_by } = req.body;
 
   db.query(
     `INSERT INTO products 
      (PRODUCT_NAME, PRICE, CATEGORY_ID, STOCK, CREATED_AT, CREATED_BY)
      VALUES (?, ?, ?, ?, CURDATE(), ?)`,
-    [product_name, price, "MK", stock, created_by],
+    [product_name, price, category_id, stock, created_by],
     (err, results) => {
       if (err) {
         return res.status(500).json({ message: err.message });
@@ -48,8 +47,8 @@ export const showProductMakananById = (req, res) => {
   const { id } = req.params;
 
   db.query(
-    "SELECT * FROM products WHERE PRODUCT_ID = ? AND CATEGORY_ID = ?",
-    [id, "MK"],
+    "SELECT * FROM products WHERE PRODUCT_ID = ?",
+    [id],
     (err, results) => {
       if (err) {
         return res.status(500).json({ message: err.message });
@@ -70,14 +69,14 @@ export const showProductMakananById = (req, res) => {
  */
 export const updateProductMakananById = (req, res) => {
   const { id } = req.params;
-  const { product_name, price, stock, updated_by } = req.body;
+  const { product_name, price, category_id, stock, updated_by } = req.body;
 
   db.query(
     `UPDATE products 
      SET PRODUCT_NAME = ?, PRICE = ?, STOCK = ?, 
          UPDATED_AT = CURDATE(), UPDATED_BY = ?
-     WHERE PRODUCT_ID = ? AND CATEGORY_ID = ?`,
-    [product_name, price, stock, updated_by, id, "MK"],
+     WHERE PRODUCT_ID = ?`,
+    [product_name, price, category_id, stock, updated_by, id, ],
     (err, results) => {
       if (err) {
         return res.status(500).json({ message: err.message });
@@ -96,14 +95,41 @@ export const deleteProductMakananById = (req, res) => {
   const { id } = req.params;
 
   db.query(
-    "DELETE FROM products WHERE PRODUCT_ID = ? AND CATEGORY_ID = ?",
-    [id, "MK"],
+    "DELETE FROM products WHERE PRODUCT_ID = ?",
+    [id],
     (err, results) => {
       if (err) {
         return res.status(500).json({ message: err.message });
       }
 
       res.json({ message: "Produk Makanan berhasil dihapus" });
+    }
+  );
+};
+
+// menampilkan produk berdasarkan CATEGORY_ID
+export const getProductsByCategoryId = (req, res) => {
+  const { id } = req.params;
+
+  db.query(
+    `SELECT 
+        PRODUCT_ID,
+        PRODUCT_NAME,
+        PRICE,
+        CATEGORY_ID
+     FROM products
+     WHERE CATEGORY_ID = ?`,
+    [id],
+    (err, results) => {
+      if (err) {
+        return res.status(500).json({ message: err.message });
+      }
+
+      if (results.length === 0) {
+        return res.status(404).json({ message: "Produk tidak ditemukan" });
+      }
+
+      res.json(results);
     }
   );
 };
