@@ -33,10 +33,8 @@ WHERE total_beli = (
   });
 };
 
-/**
- * SOAL NO 2
- * Customer yang paling banyak melakukan order pada tahun sebelumnya
- */
+
+//  2. Customer yang paling banyak melakukan order pada tahun sebelumnya
 export const getTopCustomersLastYear = (req, res) => {
   const query = `
     SELECT CUST_NAME, total_order
@@ -74,10 +72,7 @@ WHERE total_order = (
   });
 };
 
-/**
- * SOAL NO 3
- * Customer dengan nilai order terbesar pada tahun sebelumnya
- */
+//  3. Customer dengan nilai order terbesar pada tahun sebelumnya
 export const getTopOrderValueLastYear = (req, res) => {
   const query = `
     SELECT CUST_NAME, total_belanja
@@ -115,10 +110,7 @@ WHERE total_belanja = (
   });
 };
 
-/**
- * SOAL NO 4
- * Customer dengan jumlah item produk terbanyak pada tahun sebelumnya
- */
+//  4. Customer dengan jumlah item produk terbanyak pada tahun sebelumnya
 export const getTopItemBuyersLastYear = (req, res) => {
   const query = `
     SELECT CUST_NAME, total_item
@@ -158,10 +150,8 @@ WHERE total_item = (
   });
 };
 
-/**
- * SOAL NO 5
- * 10 Produk terlaris pada tahun sebelumnya
- */
+
+//  5. 10 Produk terlaris pada tahun sebelumnya
 export const getTop10BestSellingProductsLastYear = (req, res) => {
   const query = `
     SELECT PRODUCT_NAME, total_beli

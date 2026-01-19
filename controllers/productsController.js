@@ -1,9 +1,8 @@
 import db from "../config/db.js";
 
-/**
- * 1. GET
- * Menampilkan semua produk Makanan (CATEGORY_ID = 'MK')
- */
+
+// 1. GET
+// Menampilkan semua produk Makanan 
 export const getProductsMakanan = (req, res) => {
   db.query(
     "SELECT * FROM products ",
@@ -16,11 +15,8 @@ export const getProductsMakanan = (req, res) => {
   );
 };
 
-/**
- * 2. POST
- * Menyimpan produk Makanan
- * CATEGORY_ID dikunci = 'MK'
- */
+//  2. POST
+//  Menyimpan produk Makanan
 export const saveProductMakanan = (req, res) => {
   const { product_name, price, category_id, stock, created_by } = req.body;
 
@@ -39,10 +35,8 @@ export const saveProductMakanan = (req, res) => {
   );
 };
 
-/**
- * 3. GET BY ID
- * Menampilkan produk Makanan berdasarkan PRODUCT_ID
- */
+// 3. GET BY ID
+// Menampilkan produk Makanan berdasarkan PRODUCT_ID
 export const showProductMakananById = (req, res) => {
   const { id } = req.params;
 
@@ -63,10 +57,9 @@ export const showProductMakananById = (req, res) => {
   );
 };
 
-/**
- * 4. PUT
- * Update produk Makanan
- */
+
+// 4. PUT
+// Update produk Makanan
 export const updateProductMakananById = (req, res) => {
   const { id } = req.params;
   const { product_name, price, category_id, stock, updated_by } = req.body;
@@ -87,10 +80,8 @@ export const updateProductMakananById = (req, res) => {
   );
 };
 
-/**
- * 5. DELETE
- * Menghapus produk Makanan
- */
+//  5. DELETE
+//  Menghapus produk Makanan
 export const deleteProductMakananById = (req, res) => {
   const { id } = req.params;
 

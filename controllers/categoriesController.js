@@ -1,9 +1,7 @@
 import db from "../config/db.js";
 
-/**
- * 1. GET
- * Menampilkan kategori Makanan saja
- */
+// 1. GET
+// Menampilkan kategori 
 export const getcategorie = (req, res) => {
   db.query(
     "SELECT * FROM product_categories",
@@ -16,11 +14,8 @@ export const getcategorie = (req, res) => {
   );
 };
 
-/**
- * 2. POST
- * Menyimpan kategori Makanan
- * (category_id & category dikunci)
- */
+// 2. POST
+// Menyimpan kategori Makanan
 export const savecategorie = (req, res) => {
   const { id, category } = req.body;
   db.query(
@@ -35,10 +30,8 @@ export const savecategorie = (req, res) => {
   );
 };
 
-/**
- * 3. GET BY ID
- * Menampilkan kategori Makanan berdasarkan category_id
- */
+// 3. GET BY ID
+// Menampilkan kategori Makanan berdasarkan category_id atau category
 export const showcategorieById = (req, res) => {
   const { id } = req.params;
 
@@ -59,10 +52,8 @@ export const showcategorieById = (req, res) => {
   );
 };
 
-/**
- * 4. PUT
- * Update kategori Makanan (nama bisa diubah kalau mau)
- */
+// 4. PUT
+// Update kategori
 export const updatecategorieById = (req, res) => {
   const { id } = req.params;
   const { category } = req.body;
@@ -80,10 +71,8 @@ export const updatecategorieById = (req, res) => {
   );
 };
 
-/**
- * 5. DELETE
- * Menghapus kategori Makanan berdasarkan ID
- */
+// 5. DELETE
+// Menghapus kategori Makanan berdasarkan ID
 export const deletecategorieById = (req, res) => {
   const { id } = req.params;
 

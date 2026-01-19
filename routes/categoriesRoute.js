@@ -9,7 +9,6 @@ import {
 
 const router = express.Router();
 
-// KHUSUS KATEGORI MAKANAN
 router.get("/categories", getcategorie);
 router.post("/categories", savecategorie);
 router.get("/categories/:id", showcategorieById);

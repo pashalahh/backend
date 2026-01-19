@@ -7,6 +7,7 @@ import productsRoute from './routes/productsRoute.js';
 import customersRoute from './routes/customersRoute.js';
 import ordersRoute from './routes/ordersRoute.js';
 import transactionsRoute from './routes/transactionsRoute.js';
+import tableRoute from './routes/tableRoute.js';
 
 
 dotenv.config();
@@ -21,6 +22,7 @@ app.use("/api", productsRoute);
 app.use("/api", customersRoute);
 app.use("/api", ordersRoute);
 app.use("/api", transactionsRoute);
+app.use("/api", tableRoute);
 
 
 app.listen(process.env.port, () => {

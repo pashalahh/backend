@@ -28,9 +28,9 @@ export const getTransactionDetail = (req, res) => {
 
   const q = `
     SELECT 
-      od.QUANTITY, 
+      od.QTY, 
       od.PRICE, 
-      (od.QUANTITY * od.PRICE) as SUBTOTAL,
+      (od.QTY * od.PRICE) as SUBTOTAL,
       p.PRODUCT_NAME
     FROM order_details od
     JOIN products p ON od.PRODUCT_ID = p.PRODUCT_ID

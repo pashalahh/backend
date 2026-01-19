@@ -10,7 +10,6 @@ import {
 
 const router = express.Router();
 
-// KHUSUS PRODUK MAKANAN
 router.get("/products", getProductsMakanan);
 router.post("/products", saveProductMakanan);
 router.get("/products/:id", showProductMakananById);
