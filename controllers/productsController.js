@@ -62,14 +62,14 @@ export const showProductMakananById = (req, res) => {
 // Update produk Makanan
 export const updateProductMakananById = (req, res) => {
   const { id } = req.params;
-  const { product_name, price, category_id, stock, updated_by } = req.body;
+  const { product_name, price, stock, category_id, updated_by } = req.body;
 
   db.query(
     `UPDATE products 
-     SET PRODUCT_NAME = ?, PRICE = ?, STOCK = ?, 
+     SET PRODUCT_NAME = ?, PRICE = ?, STOCK = ?, CATEGORY_ID = ?,
          UPDATED_AT = CURDATE(), UPDATED_BY = ?
      WHERE PRODUCT_ID = ?`,
-    [product_name, price, category_id, stock, updated_by, id, ],
+    [product_name, price, stock, category_id, updated_by, id, ],
     (err, results) => {
       if (err) {
         return res.status(500).json({ message: err.message });

@@ -4,7 +4,8 @@ import {
     getMonthlySalesByProduct,
     getMonthlyOrdersByCustomer,
     getNominalOrderCustomerLastYear,
-    getMonthlyServiceLstYear
+    getMonthlyServiceLstYear,
+    getCashierServiceDetail
 
  } from "../controllers/tableController.js";
 
@@ -16,5 +17,6 @@ router.get("/penjualan-bulanan-produk", getMonthlySalesByProduct);
 router.get("/order-bulanan-customer", getMonthlyOrdersByCustomer);
 router.get("/nominal-order-customer", getNominalOrderCustomerLastYear);
 router.get("/layanan-bulanan-kasir", getMonthlyServiceLstYear);
+router.get("/detail-layanan-kasir/:id", getCashierServiceDetail);
 
 export default router;

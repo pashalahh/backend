@@ -174,3 +174,34 @@ export const getMonthlyServiceLstYear = (req, res) => {
   });
 };
 
+// Detail layanan yang dilayani kasir tertentu
+export const getCashierServiceDetail = (req, res) => {
+  const { id } = req.params;
+
+  const query = `
+    SELECT 
+      o.ORDER_ID,
+      o.ORDER_DATE,
+      p.PRODUCT_NAME,
+      od.QTY,
+      od.PRICE,
+      (od.QTY * od.PRICE) AS SUBTOTAL
+    FROM orders o
+    INNER JOIN order_details od 
+      ON o.ORDER_ID = od.ORDER_ID
+    INNER JOIN products p 
+      ON od.PRODUCT_ID = p.PRODUCT_ID
+    WHERE o.USER_ID = ?
+    ORDER BY o.ORDER_DATE DESC
+  `;
+
+  db.query(query, [id], (err, results) => {
+    if (err) return res.status(500).json({ message: err.message });
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: "Tidak ada layanan untuk kasir ini" });
+    }
+
+    res.json(results);
+  });
+};
