@@ -179,3 +179,177 @@ export const getTop10BestSellingProductsLastYear = (req, res) => {
     res.json(results);
   });
 };
+
+
+// Detail siapa saja yang membeli produk terlaris pada tahun sebelumnya
+export const getDetailProdukTerlaris = (req, res) => {
+  const query = `
+    SELECT DISTINCT
+        c.CUST_ID,
+        c.CUST_NAME,
+        p.PRODUCT_NAME,
+        SUM(od.QTY) AS total_dibeli
+    FROM orders o
+    INNER JOIN order_details od ON o.ORDER_ID = od.ORDER_ID
+    INNER JOIN products p ON od.PRODUCT_ID = p.PRODUCT_ID
+    INNER JOIN customers c ON o.CUST_ID = c.CUST_ID
+    WHERE od.PRODUCT_ID = (
+        SELECT PRODUCT_ID
+        FROM (
+            SELECT 
+                od.PRODUCT_ID,
+                SUM(od.QTY) AS total_beli
+            FROM orders o
+            INNER JOIN order_details od ON o.ORDER_ID = od.ORDER_ID
+            WHERE YEAR(o.ORDER_DATE) = YEAR(CURDATE()) - 1
+            GROUP BY od.PRODUCT_ID
+            ORDER BY total_beli DESC
+            LIMIT 1
+        ) AS produk_terlaris
+    )
+    AND YEAR(o.ORDER_DATE) = YEAR(CURDATE()) - 1
+    GROUP BY c.CUST_ID, c.CUST_NAME, p.PRODUCT_NAME
+  `;
+
+  db.query(query, (err, results) => {
+    if (err) {
+      return res.status(500).json({ message: err.message });
+    }
+    res.json(results);
+  });
+};
+
+// Detail order customer dengan jumlah order terbanyak tahun sebelumnya
+export const getDetailOrderCustTerbanyak = (req, res) => {
+  const query = `
+    SELECT
+        o.ORDER_ID,
+        o.ORDER_DATE,
+        o.TOTAL AS total_order,
+        c.CUST_NAME,
+        u.USERNAME AS kasir
+    FROM orders o
+    INNER JOIN customers c ON o.CUST_ID = c.CUST_ID
+    INNER JOIN cashiers u ON o.USER_ID = u.USER_ID
+    WHERE o.CUST_ID = (
+        SELECT CUST_ID
+        FROM (
+            SELECT
+                CUST_ID,
+                COUNT(ORDER_ID) AS total_order
+            FROM orders
+            WHERE YEAR(ORDER_DATE) = YEAR(CURDATE()) - 1
+            GROUP BY CUST_ID
+            ORDER BY total_order DESC
+            LIMIT 1
+        ) AS cust_terbanyak_order
+    )
+    AND YEAR(o.ORDER_DATE) = YEAR(CURDATE()) - 1
+    ORDER BY o.ORDER_DATE
+  `;
+
+  db.query(query, (err, results) => {
+    if (err) {
+      return res.status(500).json({ message: err.message });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: "Data tidak ditemukan" });
+    }
+
+    res.json(results);
+  });
+};
+
+
+// Detail order customer dengan total belanja terbesar tahun sebelumnya
+export const getDetailTotalBelanjaCustTerbanyak = (req, res) => {
+  const query = `
+    SELECT
+        o.ORDER_ID,
+        o.ORDER_DATE,
+        c.CUST_NAME,
+        p.PRODUCT_NAME,
+        od.QTY,
+        o.TOTAL AS total_order,
+        u.USERNAME AS kasir
+    FROM orders o
+    INNER JOIN order_details od ON o.ORDER_ID = od.ORDER_ID
+    INNER JOIN products p ON od.PRODUCT_ID = p.PRODUCT_ID
+    INNER JOIN customers c ON o.CUST_ID = c.CUST_ID
+    INNER JOIN cashiers u ON o.USER_ID = u.USER_ID
+    WHERE o.CUST_ID = (
+        SELECT CUST_ID
+        FROM (
+            SELECT
+                CUST_ID,
+                SUM(TOTAL) AS total_belanja
+            FROM orders
+            WHERE YEAR(ORDER_DATE) = YEAR(CURDATE()) - 1
+            GROUP BY CUST_ID
+            ORDER BY total_belanja DESC
+            LIMIT 1
+        ) AS cust_belanja_terbesar
+    )
+    AND YEAR(o.ORDER_DATE) = YEAR(CURDATE()) - 1
+    ORDER BY o.ORDER_DATE, o.ORDER_ID
+  `;
+
+  db.query(query, (err, results) => {
+    if (err) {
+      return res.status(500).json({ message: err.message });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: "Data tidak ditemukan" });
+    }
+
+    res.json(results);
+  });
+};
+
+// Detail item dan kasir untuk customer dengan jumlah item terbanyak tahun sebelumnya
+export const getCustItemTerbanyak = (req, res) => {
+  const query = `
+    SELECT
+        o.ORDER_ID,
+        o.ORDER_DATE,
+        c.CUST_NAME,
+        p.PRODUCT_NAME,
+        od.QTY,
+        u.USERNAME AS kasir
+    FROM orders o
+    INNER JOIN order_details od ON o.ORDER_ID = od.ORDER_ID
+    INNER JOIN products p ON od.PRODUCT_ID = p.PRODUCT_ID
+    INNER JOIN customers c ON o.CUST_ID = c.CUST_ID
+    INNER JOIN cashiers u ON o.USER_ID = u.USER_ID
+    WHERE o.CUST_ID = (
+        SELECT CUST_ID
+        FROM (
+            SELECT
+                o.CUST_ID,
+                SUM(od.QTY) AS total_item
+            FROM orders o
+            INNER JOIN order_details od ON o.ORDER_ID = od.ORDER_ID
+            WHERE YEAR(o.ORDER_DATE) = YEAR(CURDATE()) - 1
+            GROUP BY o.CUST_ID
+            ORDER BY total_item DESC
+            LIMIT 1
+        ) AS cust_item_terbanyak
+    )
+    AND YEAR(o.ORDER_DATE) = YEAR(CURDATE()) - 1
+    ORDER BY o.ORDER_DATE, o.ORDER_ID
+  `;
+
+  db.query(query, (err, results) => {
+    if (err) {
+      return res.status(500).json({ message: err.message });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: "Data tidak ditemukan" });
+    }
+
+    res.json(results);
+  });
+};
